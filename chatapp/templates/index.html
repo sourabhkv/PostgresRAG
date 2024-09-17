@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure OpenAI Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 600px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .input-container {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            min-height: 100px;
+            max-height: 150px;
+            overflow-y: auto;
+            background-color: #fafafa;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .input-container[contenteditable="true"]:empty:before {
+            content: "Type your message here...";
+            color: #aaa;
+        }
+
+        .input-container .image-preview {
+            max-width: 100px; /* Fixed width */
+            max-height: 100px; /* Fixed height */
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+
+        button {
+            background-color: #007bff;
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #response-container {
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            min-height: 100px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap; /* Preserve whitespace formatting */
+        }
+
+        /* Additional styling for Markdown rendering */
+        .markdown {
+            line-height: 1.6;
+        }
+
+        .markdown h1, .markdown h2, .markdown h3 {
+            color: #333;
+        }
+
+        .markdown a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .markdown a:hover {
+            text-decoration: underline;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputContainer = document.getElementById('input-container');
+
+            // Handle pasting of images and showing preview
+            inputContainer.addEventListener('paste', (event) => {
+                event.preventDefault(); // Prevent default paste behavior
+
+                const items = event.clipboardData.items;
+
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].type.startsWith('image/')) {
+                        const blob = items[i].getAsFile();
+                        const url = URL.createObjectURL(blob);
+
+                        // Create an image element and add it to the contenteditable div
+                        const img = document.createElement('img');
+                        img.src = url;
+                        img.classList.add('image-preview');
+                        inputContainer.appendChild(img);
+                    }
+                }
+            });
+        });
+
+        async function sendMessage(event) {
+            event.preventDefault();
+            const inputContainer = document.getElementById('input-container');
+            const userContent = inputContainer.innerHTML;
+            const responseContainer = document.getElementById('response-container');
+            responseContainer.innerHTML = ''; // Clear previous response
+
+            // Prepare the content with embedded images
+            const images = Array.from(inputContainer.querySelectorAll('img')).map(img => img.src);
+            const text = userContent.replace(/<img[^>]*>/g, ''); // Remove image tags from text
+
+            const payload = {
+                prompt: text,
+                images: images
+            };
+
+            const response = await fetch('/stream-response/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let markdownContent = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                const chunk = decoder.decode(value);
+                markdownContent += chunk;
+
+                // Convert Markdown to HTML
+                const htmlContent = marked.parse(markdownContent);
+                responseContainer.innerHTML = htmlContent;
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="chat-container">
+        <h1>Chat with Azure OpenAI</h1>
+        <form onsubmit="sendMessage(event)">
+            <div id="input-container" class="input-container" contenteditable="true"></div>
+            <br>
+            <button type="submit">Send</button>
+        </form>
+        <div id="response-container" class="markdown"></div>
+    </div>
+</body>
+</html>

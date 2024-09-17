@@ -1,0 +1,7 @@
+(my_env) D:\azure\chat>setx OPENAI_API_KEY "22bdc5e21bf7469da2f9fe1b0b3acd04"
+
+SUCCESS: Specified value was saved.
+
+(my_env) D:\azure\chat>setx OPENAI_API_ENDPOINT "https://just-testing-22.openai.azure.com/"
+
+SUCCESS: Specified value was saved.
