@@ -10,3 +10,7 @@ Interactive Chat: The application features an interactive chat section where use
 comes with a personal chat app also
 
 [Demo](https://bitbangaloreeduin-my.sharepoint.com/:v:/g/personal/1bi21cs147_bit-bangalore_edu_in/ESa6qJHBDF9HkoS6CmtoaOEBIta5c0YvRksyK2yWcwD7Kw?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=lrpyvF)
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/fc96c2af-a9f2-4651-8900-6c70c879e1a7" alt="hack-together-rag-hack-2024 (1)">
+</div>
